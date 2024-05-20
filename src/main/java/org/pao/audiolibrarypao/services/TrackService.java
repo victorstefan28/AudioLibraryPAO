@@ -1,17 +1,14 @@
 package org.pao.audiolibrarypao.services;
 
-
+import java.util.List;
 import org.pao.audiolibrarypao.entities.Track;
 import org.pao.audiolibrarypao.repositories.TrackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class TrackService {
-    @Autowired
-    private TrackRepository trackRepository;
+    @Autowired private TrackRepository trackRepository;
 
     public Track saveTrack(Track track) {
         return trackRepository.save(track);

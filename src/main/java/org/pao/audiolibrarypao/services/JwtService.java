@@ -1,17 +1,17 @@
 package org.pao.audiolibrarypao.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
-
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import lombok.Setter;
 import org.pao.audiolibrarypao.entities.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Service
 public class JwtService {
@@ -23,8 +23,20 @@ public class JwtService {
     @Setter
     private long jwtExpiration;
 
+    private final ObjectMapper objectMapper;
+
+    public JwtService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public Optional<User> extractUser(String token) {
+        Claims claims = extractAllClaims(token);
+        Map<String, Object> userMap = claims.get("user", Map.class);
+        return Optional.ofNullable(objectMapper.convertValue(userMap, User.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -33,6 +45,7 @@ public class JwtService {
     }
 
     private Claims extractAllClaims(String token) {
+
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey.getBytes())
                 .build()
@@ -44,24 +57,34 @@ public class JwtService {
         try {
             final String username = extractUsername(token);
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (ExpiredJwtException e) {
+            return false;
         }
-        catch(ExpiredJwtException e) { return false; }
     }
 
     private boolean isTokenExpired(String token) {
         try {
             return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return false;
         }
-        catch(ExpiredJwtException e) { return true; }
-        catch(Exception e) { return false; }
     }
 
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public String generateToken(UserDetails userDetails, User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("user", user);
+        return createToken(claims, userDetails.getUsername());
+    }
+
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+
         return createToken(claims, userDetails.getUsername());
     }
 

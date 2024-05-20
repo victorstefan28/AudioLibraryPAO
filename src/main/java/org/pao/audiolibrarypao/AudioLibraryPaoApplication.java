@@ -12,5 +12,4 @@ public class AudioLibraryPaoApplication {
     public static void main(String[] args) {
         SpringApplication.run(AudioLibraryPaoApplication.class, args);
     }
-
 }
