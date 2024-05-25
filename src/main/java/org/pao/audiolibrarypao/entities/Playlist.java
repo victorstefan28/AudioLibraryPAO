@@ -1,5 +1,6 @@
 package org.pao.audiolibrarypao.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ public class Playlist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Getter
+    @JsonIgnore
     private Long id;
 
     @NotBlank(message = "Playlist name is required")

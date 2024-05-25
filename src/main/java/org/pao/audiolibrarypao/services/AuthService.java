@@ -1,8 +1,6 @@
 package org.pao.audiolibrarypao.services;
 
 import java.util.Optional;
-import lombok.Getter;
-import lombok.Setter;
 import org.pao.audiolibrarypao.entities.Token;
 import org.pao.audiolibrarypao.entities.User;
 import org.pao.audiolibrarypao.repositories.TokenRepository;
@@ -16,17 +14,30 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for handling authentication-related operations.
+ */
 @Service
 public class AuthService {
 
-    @Autowired private UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    @Autowired private TokenRepository tokenRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
 
-    @Autowired private JwtService jwtService;
+    @Autowired
+    private JwtService jwtService;
 
+    /**
+     * Registers a new user.
+     *
+     * @param user the user to register
+     * @return a ResponseEntity indicating the result of the registration
+     */
     public ResponseEntity<?> registerUser(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             return ResponseEntity.badRequest().body("Email already in use");
@@ -37,11 +48,17 @@ public class AuthService {
         return ResponseEntity.ok("User registered successfully");
     }
 
+    /**
+     * Logs in a user.
+     *
+     * @param loginRequest the login request containing the user's email and password
+     * @return a ResponseEntity containing the authentication response or an error status
+     */
     public ResponseEntity<?> loginUser(LoginRequest loginRequest) {
         Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
         if (userOptional.isEmpty()
                 || !passwordEncoder.matches(
-                        loginRequest.getPassword(), userOptional.get().getPassword())) {
+                loginRequest.getPassword(), userOptional.get().getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -52,9 +69,13 @@ public class AuthService {
         return ResponseEntity.ok(new AuthResponse(token));
     }
 
-
+    /**
+     * Generates a JWT token for the specified user.
+     *
+     * @param user the user for whom to generate the token
+     * @return the generated JWT token
+     */
     private String generateToken(User user) {
-
         UserDetails userDetails =
                 org.springframework.security.core.userdetails.User.withUsername(user.getEmail())
                         .password(user.getPassword())
@@ -63,12 +84,13 @@ public class AuthService {
         return this.jwtService.generateToken(userDetails, user);
     }
 
-    // save user token
+    /**
+     * Saves the user's token to the repository.
+     *
+     * @param user the user for whom to save the token
+     * @param jwtToken the JWT token to save
+     */
     private void saveUserToken(User user, String jwtToken) {
-        // save user token to repository
-
         this.tokenRepository.save(new Token(jwtToken, user));
     }
 }
-
-
