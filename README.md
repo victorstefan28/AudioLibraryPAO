@@ -27,7 +27,7 @@ cd audiolibrarypao
 ### Configure the Application
 
 1. Copy the example properties file:
-
+    
     ```bash
     cp src/main/resources/application.example.properties src/main/resources/application.properties
     ```
@@ -35,6 +35,34 @@ cd audiolibrarypao
 2. Edit the `application.properties` file to configure your database and other settings.
 
 ### Running the Database with Docker Compose
+
+An example of `docker-compose.yml`:
+```yaml
+version: "3.9"
+services:
+  database:
+    image: postgres:latest
+    restart: always
+    container_name: audio-library-db
+    environment:
+      - POSTGRES_DB=DB_NAME
+      - POSTGRES_USER=DB_USER
+      - POSTGRES_PASSWORD=DB_PASSWORD
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: PGA_EMAIL
+      PGADMIN_DEFAULT_PASSWORD: PGA_PASS
+    ports:
+      - "8080:80"
+    depends_on:
+      - database
+```
 
 Ensure you have Docker and Docker Compose installed. Then, use the provided `docker-compose.yml` file to set up the database:
 
