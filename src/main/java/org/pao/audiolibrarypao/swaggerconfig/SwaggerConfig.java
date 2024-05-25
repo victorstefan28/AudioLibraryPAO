@@ -22,7 +22,7 @@ public class SwaggerConfig {
                                                 .type(SecurityScheme.Type.HTTP)
                                                 .scheme("bearer")
                                                 .bearerFormat("JWT")))
-                .info(new Info().title("Your API").version("v1"))
+                .info(new Info().title("Audio Library").version("v1"))
                 .addSecurityItem(new SecurityRequirement().addList("bearer-key"));
     }
 }
